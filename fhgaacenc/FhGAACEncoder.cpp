@@ -474,8 +474,8 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 {
 	__int64 total = 0;
 	int used,i;
-	_TCHAR tempDir[MAX_PATH+1];
-	_TCHAR tempFile[MAX_PATH+1];
+	_TCHAR tempDir[MAX_PATH];
+	_TCHAR tempFile[MAX_PATH];
 #ifdef UNICODE
 	char tempFileMB[1024];
 #endif
@@ -485,11 +485,11 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 	
 	if(!fp && !sff) goto last;
 	
-	GetTempPath(MAX_PATH+1, tempDir);
+	GetTempPath(MAX_PATH, tempDir);
 	GetTempFileName(tempDir,_T("fhg"),0,tempFile);
-	GetLongPathName(tempFile,tempFile,MAX_PATH+1);
+	GetLongPathName(tempFile,tempFile,MAX_PATH);
 #ifdef UNICODE
-	wcstombs_s(NULL,tempFileMB,1024,tempFile,(MAX_PATH+1)*sizeof(_TCHAR));
+	wcstombs_s(NULL,tempFileMB,1024,tempFile,(MAX_PATH)*sizeof(_TCHAR));
 #endif
 	
 	FILE * tmp;
