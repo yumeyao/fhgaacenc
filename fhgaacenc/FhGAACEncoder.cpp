@@ -474,10 +474,12 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 {
 	__int64 total = 0;
 	int used,i;
-	_TCHAR tempDir[MAX_PATH];
-	_TCHAR tempFile[MAX_PATH];
+	char tempDir[MAX_PATH];
+	char tempFileMB[MAX_PATH];
 #ifdef UNICODE
-	char tempFileMB[1024];
+	TCHAR tempFile[MAX_PATH];
+#else
+#define tempFile
 #endif
 	int *readbuf = (int *)malloc(channels*4*SAMPLES_PER_LOOP);
 	unsigned char *inbuf = (unsigned char *)malloc(channels*4*SAMPLES_PER_LOOP);
@@ -485,11 +487,11 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 	
 	if(!fp && !sff) goto last;
 	
-	GetTempPath(MAX_PATH, tempDir);
-	GetTempFileName(tempDir,_T("fhg"),0,tempFile);
-	GetLongPathName(tempFile,tempFile,MAX_PATH);
+	GetTempPathA(MAX_PATH, tempDir);
+	GetTempFileNameA(tempDir,"fhg",0,tempFileMB);
+	GetLongPathNameA(tempFileMB,tempFileMB,MAX_PATH);
 #ifdef UNICODE
-	wcstombs_s(NULL,tempFileMB,1024,tempFile,(MAX_PATH)*sizeof(_TCHAR));
+	mbstowcs(tempFile, tempFileMB, MAX_PATH);
 #endif
 	
 	FILE * tmp;
@@ -499,11 +501,7 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 	outt = mmioFOURCC('A','A','C','f');
 	fclose(tmp);
 
-#ifdef UNICODE
 	encoder=createAudio3(channels,samplerate,bitPerSample,mmioFOURCC('P','C','M',' '),&outt,tempFileMB);
-#else
-	encoder=createAudio3(channels,samplerate,bitPerSample,mmioFOURCC('P','C','M',' '),&outt,tempFile);
-#endif
 	DeleteFile(tempFile);
 	if(!encoder) {
 		fprintf(stderr,"error: createAudio3 failure (input PCM format is unsupported or invalid encoding parameters)\n");
