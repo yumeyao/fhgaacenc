@@ -9,14 +9,30 @@
 #define VERSION 20120624
 
 #define DL_LIBSNDFILE
+#define USE_FREE_FOR_DELETE
 
 #ifdef _MSC_VER
 #define fseeko _fseeki64
 #define ftello _ftelli64
 #endif
 
+#if _MSC_FULL_VER > 13009037
+#pragma intrinsic(_byteswap_ulong)
+#pragma intrinsic(_byteswap_ushort)
+#define SWAP32(n) _byteswap_ulong(n)
+#define SWAP16(n) _byteswap_ushort(n)
+#else
 #define SWAP32(n) ((((n)>>24)&0xff) | (((n)>>8)&0xff00) | (((n)<<8)&0xff0000) | (((n)<<24)&0xff000000))
 #define SWAP16(n) ((((n)>>8)&0xff) | (((n)<<8)&0xff00))
+#endif
+
+#ifdef __cplusplus
+#ifdef USE_FREE_FOR_DELETE
+__forceinline void __cdecl operator delete( void *pv ) {
+	free(pv);
+}
+#endif
+#endif
 
 typedef enum
 {
