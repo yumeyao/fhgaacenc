@@ -174,10 +174,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		_TCHAR *filenamePtr = PathFindFileName(params.inFile);
 		int bufSize = _tcslen(filenamePtr)+5;
 		params.outFile = new _TCHAR[bufSize];
-		_tcscpy_s(params.outFile,bufSize,filenamePtr);
+		memcpy(params.outFile,filenamePtr,(bufSize-5)*sizeof(TCHAR));
 		_TCHAR *extPtr = PathFindExtension(params.outFile);
-		if(params.adtsMode) _tcscpy_s(extPtr,5,_T(".aac"));
-		else _tcscpy_s(extPtr,5,_T(".m4a"));
+		if(params.adtsMode) memcpy(extPtr,_T(".aac"),5*sizeof(TCHAR));
+		else memcpy(extPtr,_T(".m4a"),5*sizeof(TCHAR));
 	}
 	else replaceSlashWithBackSlash(params.outFile);
 

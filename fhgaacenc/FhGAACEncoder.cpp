@@ -494,7 +494,7 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 	
 	FILE * tmp;
 	unsigned int outt;
-	_tfopen_s(&tmp,tempFile,_T("wt"));
+	tmp = _tfopen(tempFile,_T("wt"));
 	fprintf(tmp, "[audio_fhgaac]\nmode=%d\nprofile=%d\nbitrate=%d\npreset=%d\nsurround=0\n",params->mode,params->profile,params->modeQuality,params->modeQuality);
 	outt = mmioFOURCC('A','A','C','f');
 	fclose(tmp);
@@ -515,8 +515,7 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 		fpw = stdout;
 		_setmode(_fileno(stdout), _O_BINARY);
 	}
-	else if(_tfopen_s(&fpw, outFile,_T("wb"))) {
-		if(fpw) fclose(fpw);
+	else if(!(fpw = _tfopen(outFile,_T("wb")))) {
 		fprintf(stderr,"error: cannot create output file\n");
 		goto last;
 	}
@@ -530,7 +529,7 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 	if (params->adtsMode) {
 		FILE *fpTemp = NULL;
 		finishAudio3(tempFile,encoder);
-		if(!_tfopen_s(&fpTemp,tempFile,_T("rb"))) {
+		if(fpTemp = _tfopen(tempFile,_T("rb"))) {
 			unsigned int value = getFrequencyAndChannelFromM4a(fpTemp);
 				if(value != 0xffffffff) {
 				srindex = (value >> 4) & 0xf;
@@ -632,7 +631,7 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 		finishAudio3(outFile,encoder);
 		struct __stat64 statbuf;
 		if(!_tstat64(outFile,&statbuf)) {
-			if(!_tfopen_s(&fpw,outFile,_T("r+b"))) {
+			if(fpw = _tfopen(outFile,_T("r+b"))) {
 				optimizeAtoms(fpw,statbuf.st_size);
 			}
 			if(fpw) fclose(fpw);
