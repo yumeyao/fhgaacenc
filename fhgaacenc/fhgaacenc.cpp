@@ -116,18 +116,23 @@ int _tmain(int argc, _TCHAR* argv[])
 		return 0;
 	}
 
-	HMODULE h = LoadLibrary(_T("enc_fhgaac.dll"));
+	HMODULE h = LoadLibraryA(&("Plugins\\enc_fhgaac.dll"[8]));
 	if(!h) {
-		_TCHAR tmp[MAX_PATH+1];
-		if(getPathForWinAmp(tmp,MAX_PATH+1)) {
+		_TCHAR tmp[MAX_PATH+8];
+		GetModuleFileName(NULL, tmp, MAX_PATH);
+		_TCHAR *filenamePtr = PathFindFileName(tmp);
+		memcpy(filenamePtr, _T("QTfiles"), sizeof(_T("QTfiles")));
+		SetDllDirectory(tmp);
+		h = LoadLibraryA(&("Plugins\\enc_fhgaac.dll"[8]));
+		if (!h && getPathForWinAmp(tmp,MAX_PATH)) {
 			SetDllDirectory(tmp);
-			_sntprintf_s(tmp,MAX_PATH+1,_TRUNCATE,_T("%s\\Plugins\\enc_fhgaac.dll"),tmp);
-			h = LoadLibrary(tmp);
+			h = LoadLibraryA("Plugins\\enc_fhgaac.dll");
 		}
-		if(!h) {
-			fprintf(stderr,"error: cannot open enc_fhgaac.dll\n");
-			return 0;
-		}
+		SetDllDirectory(NULL);
+	}
+	if(!h) {
+		fprintf(stderr,"error: cannot open enc_fhgaac.dll\n");
+		return 0;
 	}
 
 	FhGAACEncoder *fhgenc = new FhGAACEncoder();

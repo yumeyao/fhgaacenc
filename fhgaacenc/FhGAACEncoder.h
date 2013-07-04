@@ -49,7 +49,7 @@ class FhGAACEncoder
 	{
 #define CHECK(exp) do {if(!(exp)) return false;} while(0)
 		HMODULE h;
-		CHECK(h = LoadLibrary(_T("libsndfile-1.dll")));
+		CHECK(h = LoadLibraryA("libsndfile-1.dll"));
 		hLibsndfile = h;
 
 		FARPROC fn;
