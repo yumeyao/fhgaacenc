@@ -8,6 +8,8 @@
 
 #define VERSION 20120624
 
+#define DL_LIBSNDFILE
+
 #ifdef _MSC_VER
 #define fseeko _fseeki64
 #define ftello _ftelli64

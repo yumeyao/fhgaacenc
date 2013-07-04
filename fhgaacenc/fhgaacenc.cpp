@@ -186,6 +186,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			fprintf(stderr,"Error: input file does not exist.\n");
 			goto last;
 		}
+		if(!fhgenc->loadLibsndfile()) {
+			fprintf(stderr,"Error: can't load libsndfile-1.dll.\n");
+			goto last;
+		}
 		if(!fhgenc->openFile(params.inFile)) goto last;
 	}
 

@@ -421,13 +421,13 @@ bool FhGAACEncoder::openFile(_TCHAR *inFile)
 {
 	SF_INFO sfinfo = { 0 };
 #ifdef UNICODE
-	sff = sf_wchar_open(inFile, SFM_READ, &sfinfo);
+	sff = fn_sf_wchar_open(inFile, SFM_READ, &sfinfo);
 #else
-	sff = sf_open(inFile, SFM_READ, &sfinfo);
+	sff = fn_sf_open(inFile, SFM_READ, &sfinfo);
 #endif
-	if(!sff || sf_error(sff)) {
+	if(!sff || fn_sf_error(sff)) {
 		fprintf(stderr,"Error: unsupported format\n");
-		if(sff) sf_close(sff);
+		if(sff) fn_sf_close(sff);
 		return false;
 	}
 	samplerate = sfinfo.samplerate;
@@ -459,7 +459,7 @@ bool FhGAACEncoder::openFile(_TCHAR *inFile)
 		break;*/
 	  default:
 		fprintf(stderr,"Error: unsupported format\n");
-		sf_close(sff);
+		fn_sf_close(sff);
 		sff = NULL;
 		return false;
 	}
@@ -551,9 +551,9 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 		if(totalFrames && total + SAMPLES_PER_LOOP > totalFrames) readSize = (int)(totalFrames - total);
 		
 		if(sff) {
-			if(bitPerSample == 32) ret = (int)sf_readf_int(sff,(int *)inbuf,readSize);
+			if(bitPerSample == 32) ret = (int)fn_sf_readf_int(sff,(int *)inbuf,readSize);
 			else {
-				ret = (int)sf_readf_int(sff,(int *)readbuf,readSize);
+				ret = (int)fn_sf_readf_int(sff,(int *)readbuf,readSize);
 				for(i=0;i<ret*channels;i++) {
 					switch(bitPerSample) {
 					  case 8:
