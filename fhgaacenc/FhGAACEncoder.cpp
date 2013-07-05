@@ -338,13 +338,13 @@ bool FhGAACEncoder::openStream(FILE *stream)
 
 	if(fread(chunk,1,4,fp) < 4) goto last;
 	if(memcmp(chunk,"RIFF",4)) {
-		fprintf(stderr,"Error: input stream is not a RIFF WAVE file\n");
+		fputs("Error: input stream is not a RIFF WAVE file\n",stderr);
 		goto last;
 	}
 	if(fseek_stdin(fp,4,&seekBuf,&seekBufSize)) goto last;
 	if(fread(chunk,1,4,fp) < 4) goto last;
 	if(memcmp(chunk,"WAVE",4)) {
-		fprintf(stderr,"Error: input stream is not a RIFF WAVE file\n");
+		fputs("Error: input stream is not a RIFF WAVE file\n",stderr);
 		goto last;
 	}
 	while(1) { // find fmt chunk
@@ -365,7 +365,7 @@ bool FhGAACEncoder::openStream(FILE *stream)
 		extensible = true;
 	}
 	else {
-		fprintf(stderr,"Error: unsupported format\n");
+		fputs("Error: unsupported format\n",stderr);
 		goto last;
 	}
 	if(fread(&tmp2,2,1,fp) < 1) goto last;
@@ -393,12 +393,12 @@ bool FhGAACEncoder::openStream(FILE *stream)
 			PCMType = kPCMTypeFloat;
 		}*/
 		else {
-			fprintf(stderr,"Error: unsupported format\n");
+			fputs("Error: unsupported format\n",stderr);
 			goto last;
 		}
 	}
 	else if(extensible) {
-		fprintf(stderr,"Error: unsupported format\n");
+		fputs("Error: unsupported format\n",stderr);
 		goto last;
 	}
 	else if(fseek_stdin(fp,chunkSize-16,&seekBuf,&seekBufSize)) goto last;
@@ -426,7 +426,7 @@ bool FhGAACEncoder::openFile(_TCHAR *inFile)
 	sff = fn_sf_open(inFile, SFM_READ, &sfinfo);
 #endif
 	if(!sff || fn_sf_error(sff)) {
-		fprintf(stderr,"Error: unsupported format\n");
+		fputs("Error: unsupported format\n",stderr);
 		if(sff) fn_sf_close(sff);
 		return false;
 	}
@@ -458,7 +458,7 @@ bool FhGAACEncoder::openFile(_TCHAR *inFile)
 		type = kPCMTypeFloat;
 		break;*/
 	  default:
-		fprintf(stderr,"Error: unsupported format\n");
+		fputs("Error: unsupported format\n",stderr);
 		fn_sf_close(sff);
 		sff = NULL;
 		return false;
@@ -504,7 +504,7 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 	encoder=createAudio3(channels,samplerate,bitPerSample,mmioFOURCC('P','C','M',' '),&outt,tempFileMB);
 	DeleteFile(tempFile);
 	if(!encoder) {
-		fprintf(stderr,"error: createAudio3 failure (input PCM format is unsupported or invalid encoding parameters)\n");
+		fputs("error: createAudio3 failure (input PCM format is unsupported or invalid encoding parameters)\n",stderr);
 		goto last;
 	}
 
@@ -514,7 +514,7 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 		_setmode(_fileno(stdout), _O_BINARY);
 	}
 	else if(!(fpw = _tfopen(outFile,_T("wb")))) {
-		fprintf(stderr,"error: cannot create output file\n");
+		fputs("error: cannot create output file\n",stderr);
 		goto last;
 	}
 
@@ -605,7 +605,7 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 		}
 		if(ret < readSize || (totalFrames && total >= totalFrames)) break;
 	}
-	putc('\n', stderr);
+	fputs("\n", stderr);
 	prepareToFinish(0,encoder);
 	while(1) {
 		used = 0;

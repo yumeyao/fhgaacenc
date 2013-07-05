@@ -26,25 +26,28 @@ bool getPathForWinAmp(_TCHAR *path, unsigned int length)
 	return ret;
 }
 
+#define _stringer(x) #x
+#define stringer(x) _stringer(x)
 static void printUsage(void)
 {
-	fprintf(stderr,"fhgaacenc version %d by tmkk\n",VERSION);
-	fprintf(stderr,"Usage: fhgaacenc.exe [options] infile [outfile]\n");
-	fprintf(stderr,"  Note: pass - as infile to encode from stdin.\n");
-	fprintf(stderr,"        pass - as outfile to encode to stdout (ADTS only).\n\n");
-	fprintf(stderr,"  General encoding options\n");
-	fprintf(stderr,"\t--cbr <bitrate> : encode in CBR mode, bitrate=8..576\n");
-	fprintf(stderr,"\t--vbr <preset>  : encode in VBR mode, preset=1..6 [default]\n");
-	fprintf(stderr,"\t--profile <auto|lc|he|hev2> : choose AAC profile (only for CBR mode)\n");
-	fprintf(stderr,"\t    auto : automatically choose the optimum profile\n");
-	fprintf(stderr,"\t           according to the bitrate [default]\n");
-	fprintf(stderr,"\t    lc   : force use LC-AAC profile\n");
-	fprintf(stderr,"\t    he   : force use HE-AAC (AAC+SBR) profile\n");
-	fprintf(stderr,"\t    hev2 : force use HE-AAC v2 (AAC+SBR+PS) profile\n");
-	fprintf(stderr,"\t--adts : use ADTS container instead of MPEG-4\n");
-	fprintf(stderr,"  Other options \n");
-	fprintf(stderr,"\t--ignorelength : ignore the size of data chunk when encoding from pipe\n");
-	fprintf(stderr,"\t--quiet        : don't print the progress\n");
+	fputs("fhgaacenc version " stringer(VERSION) " by tmkk\n"
+		"Usage: fhgaacenc.exe [options] infile [outfile]\n"
+		"  Note: pass - as infile to encode from stdin.\n"
+		"        pass - as outfile to encode to stdout (ADTS only).\n\n"
+		"  General encoding options\n"
+		"\t--cbr <bitrate> : encode in CBR mode, bitrate=8..576\n"
+		"\t--vbr <preset>  : encode in VBR mode, preset=1..6 [default]\n"
+		"\t--profile <auto|lc|he|hev2> : choose AAC profile (only for CBR mode)\n"
+		"\t    auto : automatically choose the optimum profile\n"
+		"\t           according to the bitrate [default]\n"
+		"\t    lc   : force use LC-AAC profile\n"
+		"\t    he   : force use HE-AAC (AAC+SBR) profile\n"
+		"\t    hev2 : force use HE-AAC v2 (AAC+SBR+PS) profile\n"
+		"\t--adts : use ADTS container instead of MPEG-4\n"
+		"  Other options \n"
+		"\t--ignorelength : ignore the size of data chunk when encoding from pipe\n"
+		"\t--quiet        : don't print the progress\n"
+		,stderr);
 }
 
 static void replaceSlashWithBackSlash(_TCHAR *str)
@@ -102,7 +105,7 @@ static int parseArguments(int argc, _TCHAR* argv[], encodingParameters *params)
 	if(!params->inFile) return -1;
 	if(params->mode == kModeVBR && params->profile != kProfileAuto) {
 		params->profile = kProfileAuto;
-		fprintf(stderr,"Warning: AAC profile in VBR mode is chosen automatically.\n");
+		fputs("Warning: AAC profile in VBR mode is chosen automatically.\n",stderr);
 	}
 	return 0;
 }
@@ -131,7 +134,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		SetDllDirectory(NULL);
 	}
 	if(!h) {
-		fprintf(stderr,"error: cannot open enc_fhgaac.dll\n");
+		fputs("error: cannot open enc_fhgaac.dll\n",stderr);
 		return 0;
 	}
 
@@ -147,7 +150,7 @@ int _tmain(int argc, _TCHAR* argv[])
 #endif
 
 	if(!fhgenc->createAudio3 || !fhgenc->finishAudio3 || !fhgenc->prepareToFinish) {
-		fprintf(stderr,"error: cannot get encoding functions\n");
+		fputs("error: cannot get encoding functions\n",stderr);
 		FreeLibrary(h);
 		return 0;
 	}
@@ -156,13 +159,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	memset(&params,0,sizeof(encodingParameters));
 	params.modeQuality = 4;
 	if(parseArguments(argc, argv, &params)) {
-		if(argc>1)fprintf(stderr,"Error while parsing arguments\n");
+		if(argc>1)fputs("Error while parsing arguments\n",stderr);
 		printUsage();
 		return 0;
 	}
 	/*
 	if(params.mode == kModeVBR && params.adtsMode) {
-		fprintf(stderr,"Error: only CBR is supported in ADTS AAC encoder.\n");
+		fputs("Error: only CBR is supported in ADTS AAC encoder.\n",stderr);
 		return 0;
 	}
 	*/
@@ -188,11 +191,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	else {
 		if(GetFileAttributes(params.inFile) == -1) {
-			fprintf(stderr,"Error: input file does not exist.\n");
+			fputs("Error: input file does not exist.\n",stderr);
 			goto last;
 		}
 		if(!fhgenc->loadLibsndfile()) {
-			fprintf(stderr,"Error: can't load libsndfile-1.dll.\n");
+			fputs("Error: can't load libsndfile-1.dll.\n",stderr);
 			goto last;
 		}
 		if(!fhgenc->openFile(params.inFile)) goto last;
