@@ -539,13 +539,14 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 		if(fpTemp) fclose(fpTemp);
 		DeleteFile(tempFile);
 	}
-	
-	if(fp && params->ignoreLength) totalFrames = 0;
+
+	int useLength = (fp && params->ignoreLength) ? 0 : 1;
 	int framepos = 0;
+	long previousPercent = -1;
 	while(1) {
 		int ret;
 		int readSize = SAMPLES_PER_LOOP;
-		if(totalFrames && total + SAMPLES_PER_LOOP > totalFrames) readSize = (int)(totalFrames - total);
+		if(useLength && total + SAMPLES_PER_LOOP > totalFrames) readSize = (int)(totalFrames - total);
 		
 		if(sff) {
 			if(bitPerSample == 32) ret = (int)fn_sf_readf_int(sff,(int *)inbuf,readSize);
@@ -594,16 +595,19 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 			}
 		}
 
-		if(totalFrames && !params->quiet) {
-			static double previousPercent = -1.0;
-			double percent = floor(100.0*(double)total/totalFrames+0.5);
-			if(percent > previousPercent) {
-				fprintf(stderr,"\rProgress:% 4d%%",(int)percent);
+		if(useLength && !params->quiet) {
+			union { // cast double to long using magic number
+				double l_d;
+				long l_l;
+			} percent;
+			percent.l_d = 100.0*(double)total/totalFrames + 6755399441055744.0;
+			if(percent.l_l > previousPercent) {
+				previousPercent = percent.l_l;
+				fprintf(stderr,"\rProgress:% 4d%%",percent.l_l);
 				fflush(stderr);
-				previousPercent = percent;
 			}
 		}
-		if(ret < readSize || (totalFrames && total >= totalFrames)) break;
+		if(ret < readSize || (useLength && total >= totalFrames)) break;
 	}
 	fputs("\n", stderr);
 	prepareToFinish(0,encoder);
