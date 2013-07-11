@@ -10,6 +10,7 @@
 
 #define DL_LIBSNDFILE
 #define USE_FREE_FOR_DELETE
+#define USE_IOB_FOR_STDIO
 
 #ifdef _MSC_VER
 #define fseeko _fseeki64
@@ -32,6 +33,30 @@ __forceinline void __cdecl operator delete( void *pv ) {
 	free(pv);
 }
 #endif
+extern "C"{
+#endif
+
+#ifdef USE_IOB_FOR_STDIO
+
+#ifndef _STDIO_DEFINED
+#define _STDIO_DEFINED
+#endif
+_CRTIMP FILE _iob[];
+
+#ifdef _STDSTREAM_DEFINED
+#undef _STDSTREAM_DEFINED
+#undef stdin
+#undef stdout
+#undef stderr
+#endif
+#define stdin  (&_iob[0])
+#define stdout (&_iob[1])
+#define stderr (&_iob[2])
+#define _STDSTREAM_DEFINED
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 typedef enum
