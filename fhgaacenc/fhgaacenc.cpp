@@ -28,27 +28,25 @@ bool getPathForWinAmp(_TCHAR *path, unsigned int length)
 
 #define _stringer(x) #x
 #define stringer(x) _stringer(x)
-static void printUsage(void)
-{
-	fputs("fhgaacenc version " stringer(VERSION) " by tmkk\n"
-		"Usage: fhgaacenc.exe [options] infile [outfile]\n"
-		"  Note: pass - as infile to encode from stdin.\n"
-		"        pass - as outfile to encode to stdout (ADTS only).\n\n"
-		"  General encoding options\n"
-		"\t--cbr <bitrate> : encode in CBR mode, bitrate=8..576\n"
-		"\t--vbr <preset>  : encode in VBR mode, preset=1..6 [default]\n"
-		"\t--profile <auto|lc|he|hev2> : choose AAC profile (only for CBR mode)\n"
-		"\t    auto : automatically choose the optimum profile\n"
-		"\t           according to the bitrate [default]\n"
-		"\t    lc   : force use LC-AAC profile\n"
-		"\t    he   : force use HE-AAC (AAC+SBR) profile\n"
-		"\t    hev2 : force use HE-AAC v2 (AAC+SBR+PS) profile\n"
-		"\t--adts : use ADTS container instead of MPEG-4\n"
-		"  Other options \n"
-		"\t--ignorelength : ignore the size of data chunk when encoding from pipe\n"
-		"\t--quiet        : don't print the progress\n"
-		,stderr);
-}
+#define printUsage()\
+	fputs("fhgaacenc version " stringer(VERSION) " by tmkk\n"\
+		"Usage: fhgaacenc.exe [options] infile [outfile]\n"\
+		"  Note: pass - as infile to encode from stdin.\n"\
+		"        pass - as outfile to encode to stdout (ADTS only).\n\n"\
+		"  General encoding options\n"\
+		"\t--cbr <bitrate> : encode in CBR mode, bitrate=8..576\n"\
+		"\t--vbr <preset>  : encode in VBR mode, preset=1..6 [default]\n"\
+		"\t--profile <auto|lc|he|hev2> : choose AAC profile (only for CBR mode)\n"\
+		"\t    auto : automatically choose the optimum profile\n"\
+		"\t           according to the bitrate [default]\n"\
+		"\t    lc   : force use LC-AAC profile\n"\
+		"\t    he   : force use HE-AAC (AAC+SBR) profile\n"\
+		"\t    hev2 : force use HE-AAC v2 (AAC+SBR+PS) profile\n"\
+		"\t--adts : use ADTS container instead of MPEG-4\n"\
+		"  Other options \n"\
+		"\t--ignorelength : ignore the size of data chunk when encoding from pipe\n"\
+		"\t--quiet        : don't print the progress\n"\
+		,stderr)
 
 static void replaceSlashWithBackSlash(_TCHAR *str)
 {
@@ -110,9 +108,18 @@ static int parseArguments(int argc, _TCHAR* argv[], encodingParameters *params)
 	return 0;
 }
 
+#ifdef USE_IOB_FOR_STDIO
+extern "C" {
+	FILE* stderr;
+}
+#endif
 int _tmain(int argc, _TCHAR* argv[])
 {
 	_tsetlocale(LC_ALL, _T(""));
+
+#ifdef USE_IOB_FOR_STDIO
+	stderr = _stderr;
+#endif
 
 	if(argc==1) {
 		printUsage();
@@ -175,9 +182,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	if(!params.outFile) {
 		_TCHAR *filenamePtr = PathFindFileName(params.inFile);
-		int bufSize = _tcslen(filenamePtr)+5;
-		params.outFile = new _TCHAR[bufSize];
-		memcpy(params.outFile,filenamePtr,(bufSize-5)*sizeof(TCHAR));
+		int pathLength = _tcslen(filenamePtr);
+		_TCHAR *dst = new _TCHAR[pathLength+5];
+		params.outFile = dst;
+		_TCHAR *src = filenamePtr;
+		while (pathLength>0) {
+			pathLength--;
+			*dst++ = *src++;
+		}
 		_TCHAR *extPtr = PathFindExtension(params.outFile);
 		if(params.adtsMode) memcpy(extPtr,_T(".aac"),5*sizeof(TCHAR));
 		else memcpy(extPtr,_T(".m4a"),5*sizeof(TCHAR));

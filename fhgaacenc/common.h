@@ -51,7 +51,8 @@ _CRTIMP FILE _iob[];
 #endif
 #define stdin  (&_iob[0])
 #define stdout (&_iob[1])
-#define stderr (&_iob[2])
+#define _stderr (&_iob[2])
+extern FILE* stderr;
 #define _STDSTREAM_DEFINED
 #endif
 

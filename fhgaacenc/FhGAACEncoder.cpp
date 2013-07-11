@@ -540,7 +540,8 @@ __int64 FhGAACEncoder::beginEncode(_TCHAR *outFile, encodingParameters *params)
 		DeleteFile(tempFile);
 	}
 
-	int useLength = (fp && params->ignoreLength) ? 0 : 1;
+	int useLength = -1;
+	if (fp && params->ignoreLength) useLength++;
 	int framepos = 0;
 	long previousPercent = -1;
 	while(1) {
