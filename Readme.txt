@@ -2,10 +2,12 @@ Getting Started
 
   1. Install WinAmp
     
-  2. Copy required DLLs to the same directory as fhgaacenc.exe
+  2. (Optional) Copy required DLLs
+  (Optional: copy to the same directory as fhgaacenc.exe if you want fhgaacenc.exe to read from file)
   (Included in this archive)
     - libsndfile-1.dll
-  (Optional: copy from WinAmp directory if you want to uninstall WinAmp)
+  (Optional: copy to the same directory as fhgaacenc.exe, or QTfiles subdirectory in it)
+  (from WinAmp directory if you want to uninstall WinAmp)
     - enc_fhgaac.dll
     - libmp4v2.dll
     - nsutil.dll
